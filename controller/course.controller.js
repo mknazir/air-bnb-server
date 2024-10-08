@@ -137,51 +137,18 @@ exports.getCoursesBySubcategory = async (req, res) => {
 
 // Get all courses
 exports.getAllCourses = async (req, res) => {
-
-  console.log("getAllCourse");
-  
   try {
     const db = getDb();
 
-    // Fetch all courses from the database
-    const courses = await db.collection('courses').find().toArray();
-
-    // Initialize arrays for each subcategory
-    const courses11_12 = [];
-    const coursesUnderGraduate = [];
-    const coursesPostGraduate = [];
-    const coursesEarlyCareer = [];
-
-    // Populate the arrays based on subcategory
-    courses.forEach(course => {
-      switch (course.subcategory) {
-        case '11-12':
-          courses11_12.push(course);
-          break;
-        case 'undergraduate':
-          coursesUnderGraduate.push(course);
-          break;
-        case 'postgraduate':
-          coursesPostGraduate.push(course);
-          break;
-        case 'earlycareer':
-          coursesEarlyCareer.push(course);
-          break;
-      }
-    });
-
-    // Create the response object
-    const response = {
-      "11-12": courses11_12,
-      "UnderGraduate": coursesUnderGraduate,
-      "PostGraduate": coursesPostGraduate,
-      "EarlyCareer": coursesEarlyCareer
-    };
+    // Fetch the latest 10 courses sorted by the 'created' field in descending order
+    const latestCourses = await db.collection('courses')
+      .find()
+      .toArray();
 
     // Send the response
-    res.status(200).json(response);
+    res.status(200).json(latestCourses);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch courses' });
+    res.status(500).json({ error: 'Failed to fetch latest courses' });
   }
 };
 
@@ -193,7 +160,7 @@ exports.getLatestCourses = async (req, res) => {
     const latestCourses = await db.collection('courses')
       .find()
       .sort({ created: -1 }) // Sort by created date in descending order
-      .limit(10)             // Limit to the latest 10 courses
+      .limit(5)             // Limit to the latest 10 courses
       .toArray();
 
     // Send the response
