@@ -292,10 +292,36 @@ const uploadImage = async (req, res) => {
 };
 
 
+const insertEmail = async (req, res) => {
+  const { email } = req.body;
+  console.log(email);
+  if (!email) {
+    return res.status(400).json({
+      message: "Email is not available",
+    });
+  }
+
+  const db = getDb();
+  const emailsCollection = db.collection("emails");
+
+  try {
+    await emailsCollection.insertOne({ email });
+    res.status(200).json({
+      message: "Email inserted successfully",
+    });
+  } catch (error) {
+    console.error("Error inserting email:", error);
+    res.status(500).json({
+      message: "Failed to insert email",
+    });
+  }
+};
+
 
 module.exports = {
   sendOtpWithSms,
   sendOtpWithEmail,
   validateOTP,
   uploadImage,
+  insertEmail
 };

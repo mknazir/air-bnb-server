@@ -145,7 +145,7 @@ exports.getCoursesBySubcategory = async (req, res) => {
    console.log(category);
    
     // Validate subcategory
-    const validSubcategories = ['undergraduate', 'postgraduate','11-12', 'earlycareer'];
+    const validSubcategories = ['undergraduate', 'postgraduate','11-12', 'earlycareer','school'];
     console.log(validSubcategories.includes(category));
     
     if (!validSubcategories.includes(category)) {
@@ -175,7 +175,7 @@ exports.getLatestCoursesBySubcategory = async (req, res) => {
     console.log(category);
    
     // Validate subcategory
-    const validSubcategories = ['undergraduate', 'postgraduate', '11-12', 'earlycareer'];
+    const validSubcategories = ['undergraduate', 'postgraduate', '11-12', 'earlycareer','school'];
     if (!validSubcategories.includes(category)) {
       return res.status(400).json({ error: 'Invalid subcategory provided' });
     }

@@ -13,6 +13,6 @@ courseRouter.get('/course/getLatestCoursesByCategory/:category', getLatestCourse
 
 courseRouter.get('/course/getCoursesBySubcategory/:category', getCoursesBySubcategory);
 courseRouter.get('/course/getLatestCoursesBySubcategory/:category', getLatestCoursesBySubcategory);
-
+courseRouter.get('/getCourseDetails/:courseId',getCourseById)
 
 module.exports = courseRouter;
