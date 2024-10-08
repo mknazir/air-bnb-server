@@ -80,7 +80,6 @@ exports.getCoursesByCategory = async (req, res) => {
   try {
     const db = getDb();
     const { category } = req.params; // Get category from request parameters
-    console.log(category);
     
     // Validate category
     const validCategories = ['workshops', 'internships', 'training', 'tutorials'];
@@ -103,22 +102,58 @@ exports.getCoursesByCategory = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch courses' });
   }
 };
+exports.getLatestCoursesByCategory = async (req, res) => {
+  console.log("getLatestCoursesByCategory called");
+  
+  try {
+    const db = getDb();
+    const { category } = req.params; // Get category from request parameters
+    console.log(category);
+    
+    // Validate category
+    const validCategories = ['workshops', 'internships', 'training', 'tutorials'];
+    if (!validCategories.includes(category)) {
+      return res.status(400).json({ error: 'Invalid category provided' });
+    }
+
+    // Query to find courses by the specified category, sorted by createdAt in descending order
+    // and limited to the latest 10 courses
+    const courses = await db.collection('courses')
+      .find({ category: category })
+      .sort({ createdAt: -1 })  // Sort by creation date, latest first
+      .limit(10)                 // Limit to 10 courses
+      .toArray();
+
+    // Check if courses were found
+    if (courses.length === 0) {
+      return res.status(404).json({ message: 'No courses found for this category' });
+    }
+
+    // Send the list of courses as a response
+    res.status(200).json(courses);
+  } catch (error) {
+    // Handle any errors that occur during the database query
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+};
 
 
 exports.getCoursesBySubcategory = async (req, res) => {
   try {
     const db = getDb();
-    const { subcategory } = req.params; // Get subcategory from request parameters
-
+    const { category } = req.params; // Get subcategory from request parameters
+   console.log(category);
+   
     // Validate subcategory
-    const validSubcategories = ['UnderGraduate', 'PostGraduate','11-12', 'EarlyCareerProfessional'];
-
-    if (!validSubcategories.includes(subcategory)) {
+    const validSubcategories = ['undergraduate', 'postgraduate','11-12', 'earlycareer'];
+    console.log(validSubcategories.includes(category));
+    
+    if (!validSubcategories.includes(category)) {
       return res.status(400).json({ error: 'Invalid subcategory provided' });
     }
 
     // Query to find courses by the specified subcategory
-    const courses = await db.collection('courses').find({ subcategory }).toArray();
+    const courses = await db.collection('courses').find({ subcategory:category }).toArray();
 
     // Check if courses were found
     if (courses.length === 0) {
@@ -132,6 +167,39 @@ exports.getCoursesBySubcategory = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch courses' });
   }
 };
+
+exports.getLatestCoursesBySubcategory = async (req, res) => {
+  try {
+    const db = getDb();
+    const { category } = req.params; // Get subcategory from request parameters
+    console.log(category);
+   
+    // Validate subcategory
+    const validSubcategories = ['undergraduate', 'postgraduate', '11-12', 'earlycareer'];
+    if (!validSubcategories.includes(category)) {
+      return res.status(400).json({ error: 'Invalid subcategory provided' });
+    }
+
+    // Query to find courses by the specified subcategory, sort by creation time, and limit to 10
+    const courses = await db.collection('courses')
+      .find({ subcategory: category })
+      .sort({ createdAt: -1 }) // Sort by `createdAt` field in descending order
+      .limit(10) // Limit the result to max 10 courses
+      .toArray();
+
+    // Check if courses were found
+    if (courses.length === 0) {
+      return res.status(404).json({ message: 'No courses found for this subcategory' });
+    }
+
+    // Send the list of courses as a response
+    res.status(200).json(courses);
+  } catch (error) {
+    // Handle any errors that occur during the database query
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+};
+
 
 
 
