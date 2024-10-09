@@ -6,17 +6,18 @@ exports.createBatch = async (req, res) => {
   try {
       const db = getDb();
       const { courseId } = req.params;  // Ensure courseId is coming from request parameters
-      const { batch_name, start_date, end_date, total_seats } = req.body;
+      const { batchLevel,batchType, date, mode ,time,price} = req.body;
       console.log("courseID>>",req.params);
 
       // Create the batch object
       const batch = {
-          batch_name,
-          start_date,
-          end_date,
-          total_seats,
-          seats_available: total_seats,  // Assuming available seats initially equals total seats
-          lectures: [] // You can add lectures later
+        batchLevel,
+        batchType,
+        date,
+        mode,
+        time,
+        price,
+        lectures: [] // You can add lectures later
       };
 
       // Insert the batch into the 'batches' collection

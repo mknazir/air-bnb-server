@@ -242,13 +242,30 @@ exports.getLatestCourses = async (req, res) => {
 exports.getCourseById = async (req, res) => {
   try {
     const db = getDb();
+
+    // Step 1: Find the course by its ID
     const course = await db.collection('courses').findOne({ _id: new ObjectId(req.params.courseId) });
-    if (course) {
-      res.status(200).json(course);
-    } else {
-      res.status(404).json({ message: 'Course not found' });
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
     }
+
+    // Step 2: Extract batch IDs (assuming they are stored in the course document)
+    const batchIds = course.batches;  // Assuming `batches` is an array of batch IDs
+
+    if (!batchIds || batchIds.length === 0) {
+      return res.status(200).json({ ...course, batches: [] });
+    }
+
+    // Step 3: Find all batch details from the 'batches' collection using the batch IDs
+    const batches = await db.collection('batches').find({
+      _id: { $in: batchIds.map(id => new ObjectId(id)) }
+    }).toArray();
+
+    // Step 4: Return the course with the full batch details
+    res.status(200).json({ ...course, batches });
+
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch course' });
+    res.status(500).json({ error: 'Failed to fetch course and batches' });
   }
 };
