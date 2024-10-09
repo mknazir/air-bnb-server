@@ -58,21 +58,37 @@ const validateOTP = async (req, res) => {
     console.log("OTP validated successfully for:", email || phoneNumber);
 
     // Generate token (for authentication purposes)
-    const token = jwt.sign(
-      { id: user._id},
-      process.env.JWT_SECRET_KEY
-    );
+
 
     // Send token and user details in response
     console.log("user>>", user);
-    console.log("token>>", token);
+   if(user.isRegistered){
+    const token = jwt.sign(
+      { id: user._id }, // Use the _id from the updated user
+      process.env.JWT_SECRET_KEY,
+    );
 
+    // Prepare the response with only the needed fields
+    const userDetails = {
+      token,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      school: user.school,
+      course: user.course,
+      isRegistered:user.isRegistered,
+    };
+
+    return res.status(200).json({ message: 'User Logged in successfully', user:userDetails });
+
+   }
+   
     return res.status(200).json({
       message: "Sign-in successful",
-      data: {
+      user: {
         id: user._id,
         isRegistered:user.isRegistered,
-        token
       },
     });
   } catch (error) {
@@ -318,10 +334,128 @@ const insertEmail = async (req, res) => {
 };
 
 
+const register = async (req, res) => {
+  const { id, firstName, lastName, email, phone, school, course } = req.body;
+  
+  try {
+    const db = getDb(); // Get MongoDB instance
+
+    // Find the user by ID and update the specified fields, leaving others intact
+    const userDetails = await db.collection("users").findOneAndUpdate(
+      { _id: new ObjectId(id), isRegistered: false }, // Query to find user with specified ID and ensure not registered
+      {
+        $set: {
+          firstName,          // Only add or update these fields
+          lastName,
+          email,
+          phone,
+          school,
+          course,
+          isRegistered: true, // Set the `isRegistered` flag to true
+          updatedAt: new Date() // Add the `updatedAt` timestamp
+        },
+        $setOnInsert: {
+          createdAt: new Date(), // This ensures `createdAt` is only added if the document is newly inserted (not applicable here but ensures consistency)
+        }
+      },
+      {
+        returnDocument: 'after', // Return the updated document
+        upsert: false // Do not create a new document if it doesn't exist (you only want to update)
+      }
+    );
+
+    console.log(userDetails);
+    
+    if (userDetails) { // Check if a document was updated
+
+        const token = jwt.sign(
+          { id: userDetails._id }, // Use the _id from the updated user
+          process.env.JWT_SECRET_KEY,
+        );
+  
+        // Prepare the response with only the needed fields
+        const user = {
+          token,
+          firstName: userDetails.firstName,
+          lastName: userDetails.lastName,
+          email: userDetails.email,
+          phone: userDetails.phone,
+          school: userDetails.school,
+          course: userDetails.course,
+        };
+  
+        return res.status(200).json({ message: 'User registered successfully', user });
+      // return res.status(200).json({ message: 'User registered successfully', user });
+    } else {
+      return res.status(404).json({ message: 'User not found or already registered' });
+    }
+  } catch (error) {
+    console.error('Error registering user:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// const register = async (req, res) => {
+//   const { id, firstName, lastName, email, phone, school, course } = req.body;
+
+//   try {
+//     const db = getDb(); // Get MongoDB instance
+
+//     // Find the user by ID and update the specified fields, leaving others intact
+//     const user = await db.collection("users").findOneAndUpdate(
+//       { _id: new ObjectId(id), isRegistered: false }, // Query to find user with specified ID and ensure not registered
+//       {
+//         $set: {
+//           firstName,          // Only add or update these fields
+//           lastName,
+//           email,
+//           phone,
+//           school,
+//           course,
+//           isRegistered: true, // Set the `isRegistered` flag to true
+//           updatedAt: new Date() // Add the `updatedAt` timestamp
+//         }
+//       },
+//       {
+//         returnDocument: 'after', // Return the updated document
+//         upsert: false // Do not create a new document if it doesn't exist (you only want to update)
+//       }
+//     );
+
+//     // If the user was found and updated
+//     if (user.value) {
+//       const token = jwt.sign(
+//         { id: user.value._id }, // Use the _id from the updated user
+//         process.env.JWT_SECRET_KEY,
+//         { expiresIn: '1h' } // Set the token expiration time as needed
+//       );
+
+//       // Prepare the response with only the needed fields
+//       const responseData = {
+//         token,
+//         firstName: user.value.firstName,
+//         lastName: user.value.lastName,
+//         email: user.value.email,
+//         phone: user.value.phone,
+//         school: user.value.school,
+//         course: user.value.course,
+//       };
+
+//       return res.status(200).json({ message: 'User registered successfully', user: responseData });
+//     } else {
+//       return res.status(404).json({ message: 'User not found or already registered' });
+//     }
+//   } catch (error) {
+//     console.error('Error registering user:', error);
+//     return res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
 module.exports = {
   sendOtpWithSms,
   sendOtpWithEmail,
   validateOTP,
+  register,
   uploadImage,
   insertEmail
 };
