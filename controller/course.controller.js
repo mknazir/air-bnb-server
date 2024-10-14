@@ -269,3 +269,146 @@ exports.getCourseById = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch course and batches' });
   }
 };
+
+
+exports.purchaseCourse = async (req, res) => {
+  try {
+    console.log(req.user);
+    console.log(req.body);
+
+    const { _id } = req.user;
+    const db = getDb();
+
+    // Step 1: Get the user document
+    const user = await db.collection("users").findOne({ _id });
+
+    // Step 2: Check if purchasedCourses field exists
+    if (!user || !user.purchasedCourses || user.purchasedCourses.length === 0) {
+      return res.status(404).json({ message: "No purchased courses found" });
+    }
+
+    // Step 3: Extract purchasedCourses document IDs
+    const purchasedCourseIds = user.purchasedCourses;
+    console.log("purchasedCourseIds>>", purchasedCourseIds);
+    
+    // Step 4: Fetch payment documents using purchasedCourseIds
+    const payments = await db.collection("payments").find({ _id: { $in: purchasedCourseIds } }).toArray();
+    console.log("payments", payments);
+    
+    // Step 5: Fetch course and batch details and merge them
+    const courseDetails = await Promise.all(payments.map(async (payment) => {
+      const course = await db.collection("courses").findOne({ _id: new ObjectId(payment.courseId) });
+      const batch = await db.collection("batches").findOne({ _id: new ObjectId(payment.batchId) });
+
+      // Return merged object with all course and batch fields
+      return {
+        paymentId: payment._id,
+        course: course, // Include entire course object
+        batch: batch,   // Include entire batch object
+      };
+    }));
+
+    // Step 6: Return combined results
+    res.status(200).json({ message: 'Fetched purchased course details successfully', data: courseDetails });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to purchase course' });
+  }
+};
+
+exports.addLecturesToBatch = async (req, res) => {
+  try {
+    const { batch_id, lecture } = req.body;
+
+    if (!batch_id || !lecture || typeof lecture !== "object") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Missing required fields: batch_id or lecture object is invalid",
+      });
+    }
+
+    const db = getDb();
+    const batchCollection = db.collection("batches");
+
+    // Check if the batch exists (using ObjectId for _id)
+    const batch = await batchCollection.findOne({
+      _id: new ObjectId(batch_id),
+    });
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+    const result = await batchCollection.updateOne(
+      { _id: new ObjectId(batch_id) }, // Correctly querying by ObjectId
+      {
+        $push: {
+          lectures: lecture, // Append the lecture object to the lectures array
+        },
+      }
+    );
+
+    if (result.modifiedCount > 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Lecture successfully added to the batch",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to add the lecture to the batch",
+      });
+    }
+  } catch (error) {
+    console.error("Error during lecture addition:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+exports. batchDetailsById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if the provided id is a valid ObjectId
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid batch ID format",
+      });
+    }
+
+    const batch_id = new ObjectId(id);
+    const db = getDb();
+    const batchCollection = db.collection("batches");
+
+    // Fetch the batch details using the batch_id
+    const batch = await batchCollection.findOne({ _id: batch_id });
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    // Return the batch details
+    return res.status(200).json({
+      success: true,
+      message: "Batch details retrieved successfully",
+      data: batch,
+    });
+  } catch (error) {
+    console.error("Error fetching batch details:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};

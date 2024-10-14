@@ -32,28 +32,60 @@ const createOrder = async (req, res) => {
 };
 
 const verifyOrder = async (req, res) => {
-  console.log("iside verify", req.body);
+  console.log("Inside verify", req.body);
 
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-      req.body;
-
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseId, batchId, price } = req.body;
+    console.log("body>>",req.body);
+    
     const hmac = crypto.createHmac("sha256", razorpay.key_secret);
     hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
     const generated_signature = hmac.digest("hex");
 
     if (generated_signature === razorpay_signature) {
-      console.log("isnide success");
-      return res
-        .status(200)
-        .json({ message: "'Payment verified successfully.')" });
+      console.log("Inside success");
+
+      // Get user ID from req.user
+      const userId = req.user._id; // Assuming req.user contains the authenticated user
+      console.log("userDetails>>",req.user);
+      console.log("id>>",userId);
+      
+      const db = getDb(); // Get the database connection
+
+      // Create payment details document
+      const paymentDetails = {
+        userId,
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+        courseId,
+        batchId,
+        price,
+        createdAt: new Date(), // Optional: add a timestamp
+      };
+
+      console.log("paymentDetials>>",paymentDetails);
+      
+
+      // Save payment details to the payments collection
+      const result = await db.collection("payments").insertOne(paymentDetails);
+      console.log(result);
+      
+      const paymentId = result.insertedId; // Get the newly created document ID
+
+      // Update the user's purchasedCourses array
+      await db.collection("users").updateOne(
+        { _id: userId },
+        { $push: { purchasedCourses: paymentId } } // Add the paymentId to the purchasedCourses array
+      );
+
+      return res.status(200).json({ message: "Payment verified successfully.", paymentId });
     } else {
-      console.log("isnide failure");
-      return res
-        .status(400)
-        .json({ message: "'Payment verification failed.')" });
+      console.log("Inside failure");
+      return res.status(400).json({ message: "Payment verification failed." });
     }
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: "Internal Server Error",
       error: true,

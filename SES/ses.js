@@ -234,87 +234,87 @@ const sesClient = new SESClient({
 
 
 //this template for user login credentials
-const templateName = 'AddUser';
-const subject = 'Welcome to SageTutle - Your Login Credentials';
-const htmlContent = `
-  <html>
-    <head>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 0;
-          background-color: #f5f5f5;
-        }
-        .container {
-          max-width: 600px;
-          margin: 20px auto;
-          background-color: #ffffff;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          padding: 20px;
-        }
-        .header {
-          text-align: center;
-          margin-bottom: 20px;
-        }
-        .header h1 {
-          color: #007BFF;
-          font-size: 24px;
-          margin: 0;
-        }
-        .content {
-          font-size: 16px;
-          color: #333333;
-          line-height: 1.5;
-        }
-        .login-link {
-          background-color: #e8f5e9;
-          border: 1px solid #c8e6c9;
-          border-radius: 4px;
-          padding: 15px;
-          text-align: center;
-          margin-bottom: 20px;
-        }
-        .login-link a {
-          font-size: 18px;
-          color: #007BFF;
-          text-decoration: none;
-          font-weight: bold;
-        }
-        .footer {
-          font-size: 14px;
-          color: #888888;
-          text-align: center;
-          margin-top: 20px;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>Welcome to SageTutle</h1>
-        </div>
-        <div class="content">
-          <p>Dear User,</p>
-          <p>Your account has been created successfully. You can use the following credentials to log in:</p>
-          <ul>
-            <li>Email: <strong>{{email}}</strong></li>
-            <li>Phone: <strong>{{phone}}</strong></li>
-          </ul>
-          <p>To log in, please click the link below:</p>
-          <div class="login-link">
-            <p><a href="{{websiteLink}}" target="_blank">Go to SageTutle Login</a></p>
-          </div>
-          <p>If you have any questions, feel free to reach out to our support team.</p>
-        </div>
-        <div class="footer">
-          <p>Please do not share this email with anyone. If you did not request this account, please contact support immediately.</p>
-        </div>
-      </div>
-    </body>
-  </html>
-`;
+// const templateName = 'AddUser';
+// const subject = 'Welcome to SageTutle - Your Login Credentials';
+// const htmlContent = `
+//   <html>
+//     <head>
+//       <style>
+//         body {
+//           font-family: Arial, sans-serif;
+//           margin: 0;
+//           padding: 0;
+//           background-color: #f5f5f5;
+//         }
+//         .container {
+//           max-width: 600px;
+//           margin: 20px auto;
+//           background-color: #ffffff;
+//           border-radius: 8px;
+//           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+//           padding: 20px;
+//         }
+//         .header {
+//           text-align: center;
+//           margin-bottom: 20px;
+//         }
+//         .header h1 {
+//           color: #007BFF;
+//           font-size: 24px;
+//           margin: 0;
+//         }
+//         .content {
+//           font-size: 16px;
+//           color: #333333;
+//           line-height: 1.5;
+//         }
+//         .login-link {
+//           background-color: #e8f5e9;
+//           border: 1px solid #c8e6c9;
+//           border-radius: 4px;
+//           padding: 15px;
+//           text-align: center;
+//           margin-bottom: 20px;
+//         }
+//         .login-link a {
+//           font-size: 18px;
+//           color: #007BFF;
+//           text-decoration: none;
+//           font-weight: bold;
+//         }
+//         .footer {
+//           font-size: 14px;
+//           color: #888888;
+//           text-align: center;
+//           margin-top: 20px;
+//         }
+//       </style>
+//     </head>
+//     <body>
+//       <div class="container">
+//         <div class="header">
+//           <h1>Welcome to SageTutle</h1>
+//         </div>
+//         <div class="content">
+//           <p>Dear User,</p>
+//           <p>Your account has been created successfully. You can use the following credentials to log in:</p>
+//           <ul>
+//             <li>Email: <strong>{{email}}</strong></li>
+//             <li>Phone: <strong>{{phone}}</strong></li>
+//           </ul>
+//           <p>To log in, please click the link below:</p>
+//           <div class="login-link">
+//             <p><a href="{{websiteLink}}" target="_blank">Go to SageTutle Login</a></p>
+//           </div>
+//           <p>If you have any questions, feel free to reach out to our support team.</p>
+//         </div>
+//         <div class="footer">
+//           <p>Please do not share this email with anyone. If you did not request this account, please contact support immediately.</p>
+//         </div>
+//       </div>
+//     </body>
+//   </html>
+// `;
 
 
 const createTemplate = async (templateName, subject, htmlContent) => {
@@ -334,7 +334,7 @@ const createTemplate = async (templateName, subject, htmlContent) => {
     }
 };
 
-// code for deleting existing tmeplate in ses
+// // code for deleting existing tmeplate in ses
 
 const deleteTemplate = async (templateName) => {
     const params = {
@@ -388,11 +388,11 @@ const sendTemplatedEmail = async (destinationAddresses,templateName, templateDat
 // };
 
 // this templateData is for user credentials
-const templateData = {
-  email: 'khanmdadil094@gmail.com',
-  phone: '9122672984',
-  websiteLink: 'https://covid-19-tracker-fc5dd.web.app/client',
-};
+// const templateData = {
+//   email: 'khanmdadil094@gmail.com',
+//   phone: '9122672984',
+//   websiteLink: 'https://covid-19-tracker-fc5dd.web.app/client',
+// };
 
 // createTemplate(templateName,subject,htmlContent);
 // deleteTemplate('AddUser');
@@ -400,6 +400,85 @@ const templateData = {
 
 // email should always be in array
 // sendTemplatedEmail(["khanmdadil094@gmail.com"],'AddUser',templateData)
+const templateName = "ContactSupport";
+const subject = 'New Support Request from SageTutle User';
+const htmlContent = `
+<html>
+    <head>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #F5F5F5;
+        }
+        .container {
+          max-width: 600px;
+          margin: 20px auto;
+          background-color: #FFFFFF;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          padding: 20px;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .header h1 {
+          color: #FF5722;
+          font-size: 24px;
+          margin: 0;
+        }
+        .content {
+          font-size: 16px;
+          color: #333333;
+          line-height: 1.5;
+        }
+        .details {
+          margin: 20px 0;
+          padding: 10px;
+          background-color: #E0F7FA;
+          border-radius: 8px;
+          line-height: 1.6;
+        }
+        .footer {
+          font-size: 14px;
+          color: #888888;
+          text-align: center;
+          margin-top: 20px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>New Support Request</h1>
+        </div>
+        <div class="content">
+          <p>Hello,</p>
+          <p>A user has submitted a new support request. Below are the details:</p>
+          <div class="details">
+            <p><strong>Name:</strong> {{name}}</p>
+            <p><strong>Email:</strong> {{email}}</p>
+            <p><strong>Phone:</strong> {{phone}}</p>
+            <p><strong>Description:</strong> {{desc}}</p>
+          </div>
+          <p>Please review the request and reach out to the user as soon as possible.</p>
+        </div>
+        <div class="footer">
+          <p>This is an automated message from SageTutle. Do not reply to this email.</p>
+        </div>
+      </div>
+    </body>
+  </html>
+`;
+
+
+// createTemplate(templateName,subject,htmlContent)
+
+
+
+
 
 
 
