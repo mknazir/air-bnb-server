@@ -298,4 +298,56 @@ const handleWebhook = async (req, res) => {
     res.status(400).json({ status: "failed", message: "Invalid signature" });
   }
 };
-module.exports = { createOrder, verifyOrder, createPaymentLink, handleWebhook };
+
+const applyCouponCode = async (req, res) => {
+  const { couponCode, amount } = req.body;
+
+  try {
+    const db = getDb(); // Get the database connection
+    const coupon = await db.collection("coupons").findOne({ code: couponCode });
+
+    if (!coupon) {
+      return res.status(404).json({ message: "Coupon not found." });
+    }
+
+    // Check if the coupon is active
+    if (coupon.status !== "active") {
+      return res.status(400).json({ message: "Coupon is not active." });
+    }
+
+    // Check if the coupon is expired
+    const currentDate = new Date();
+    if (new Date(coupon.expirationDate) < currentDate) {
+      return res.status(400).json({ message: "Coupon has expired." });
+    }
+
+    // Check usage limit
+    if (coupon.usageLimit <= coupon.usedCount) {
+      return res.status(400).json({ message: "Coupon usage limit reached." });
+    }
+
+    // Apply the discount
+    let finalAmount;
+    if (coupon.discountType === "percentage") {
+      finalAmount = amount - (amount * coupon.discountValue) / 100;
+    } else if (coupon.discountType === "flat") {
+      finalAmount = amount - coupon.discountValue;
+    }
+
+    // Ensure the amount is not less than zero
+    finalAmount = Math.max(finalAmount, 0);
+
+    // Return the updated amount after applying the coupon
+    return res.status(200).json({
+      message: "Coupon applied successfully.",
+      originalAmount: amount,
+      discountAmount: amount - finalAmount,
+      finalAmount,
+    });
+  } catch (error) {
+    console.error("Error applying coupon:", error);
+    res.status(500).json({ message: "Internal Server Error", error: true });
+  }
+};
+
+module.exports = { createOrder, verifyOrder, createPaymentLink, handleWebhook, applyCouponCode };
