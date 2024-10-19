@@ -334,11 +334,11 @@ exports.addLecturesToBatch = async (req, res) => {
   try {
     const { batch_id, lecture } = req.body;
 
+    // Validate input: batch_id must be provided and lecture must be an object
     if (!batch_id || !lecture || typeof lecture !== "object") {
       return res.status(400).json({
         success: false,
-        message:
-          "Missing required fields: batch_id or lecture object is invalid",
+        message: "Missing required fields: batch_id or lecture object is invalid",
       });
     }
 
@@ -356,15 +356,18 @@ exports.addLecturesToBatch = async (req, res) => {
         message: "Batch not found",
       });
     }
+
+    // Add the lecture object to the existing lectures array
     const result = await batchCollection.updateOne(
-      { _id: new ObjectId(batch_id) }, // Correctly querying by ObjectId
+      { _id: new ObjectId(batch_id) },
       {
         $push: {
-          lectures: lecture, // Append the lecture object to the lectures array
+          lectures: lecture, // Append the lecture object into the existing lectures array
         },
       }
     );
 
+    // Check if the operation was successful
     if (result.modifiedCount > 0) {
       return res.status(200).json({
         success: true,
@@ -384,6 +387,7 @@ exports.addLecturesToBatch = async (req, res) => {
     });
   }
 };
+
 
 exports. batchDetailsById = async (req, res) => {
   try {
@@ -425,3 +429,4 @@ exports. batchDetailsById = async (req, res) => {
     });
   }
 };
+
