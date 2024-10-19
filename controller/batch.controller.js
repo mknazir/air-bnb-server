@@ -54,3 +54,35 @@ exports.createBatch = async (req, res) => {
       res.status(500).json({ error: 'Failed to fetch batches' });
     }
   };
+
+  exports.getBatchesByCourseId = async (req, res) => {
+    try {
+      const db = getDb();
+      const { courseId } = req.params; // Get courseId from request parameters
+  
+      // Step 1: Find the course by its unique courseId
+      const course = await db.collection('courses').findOne({ _id:new ObjectId(courseId) });
+  
+      // Check if course exists
+      if (!course) {
+        return res.status(404).json({ message: 'Course not found' });
+      }
+  
+      // Step 2: Extract the batches array from the found course
+      const { batches } = course;
+  
+      // Check if batches exist in the course
+      if (!batches || batches.length === 0) {
+        return res.status(404).json({ message: 'No batches found for this course' });
+      }
+  
+      // Step 3: Query the 'batches' collection using the batch IDs
+      const batchDetails = await db.collection('batches').find({ _id: { $in: batches } }).toArray();
+  
+      // Step 4: Return the batch details in the response
+      res.status(200).json(batchDetails);
+    } catch (error) {
+      // Handle any errors that occur during the database query
+      res.status(500).json({ error: 'Failed to fetch batch details' });
+    }
+  };
