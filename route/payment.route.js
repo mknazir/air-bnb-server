@@ -7,7 +7,7 @@ const paymentRouter = express.Router();
 
 paymentRouter.post('/payment/createOrder', authenticateToken, createOrder);
 paymentRouter.post('/payment/verifyOrder', authenticateToken, verifyOrder);
-paymentRouter.post('/payment/applyCouponCode', authenticateToken, applyCouponCode);
+paymentRouter.post('/payment/applyCouponCode', applyCouponCode);
 paymentRouter.post('/payment/createPaymentLink', authenticateToken, createPaymentLink);
 paymentRouter.post('/payment/webhook', authenticateToken, handleWebhook);
 
