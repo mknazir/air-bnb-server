@@ -93,7 +93,11 @@ const contactSupport = async (req, res) => {
     //   ["mdadilakhtar8@gmail.com"], // Admin or support team email
     //   templateData,"ContactSupport"
     // );
-    await sendTemplatedEmail(["mdadilakhtar8@gmail.com"], "ContactSupport", templateData);
+    await sendTemplatedEmail(
+      ["mdadilakhtar8@gmail.com"],
+      "ContactSupport",
+      templateData
+    );
     return res.status(200).json({
       success: true,
       message: "Support request sent successfully",

@@ -1,5 +1,5 @@
 const express = require('express');
-const {createCourse,getAllCourses,getLatestCourses,getCoursesByCategory,getLatestCoursesByCategory,getCoursesBySubcategory,getLatestCoursesBySubcategory,getCourseById,purchaseCourse,ad, addLecturesToBatch, batchDetailsById}=require('../controller/course.controller')
+const {createCourse,getAllCourses,getLatestCourses,getCoursesByCategory,getLatestCoursesByCategory,getCoursesBySubcategory,getLatestCoursesBySubcategory,getCourseById,purchaseCourse,ad, addLecturesToBatch, batchDetailsById, deactivateCourseById}=require('../controller/course.controller')
 const authenticateToken = require('../middleware/authToken.middleware');
 
 const courseRouter = express.Router();
@@ -15,6 +15,7 @@ courseRouter.get('/course/getCoursesBySubcategory/:category', getCoursesBySubcat
 courseRouter.get('/course/getLatestCoursesBySubcategory/:category', getLatestCoursesBySubcategory);
 courseRouter.get('/getCourseDetails/:courseId',getCourseById)
 courseRouter.get('/course/getPurchasedCourses',authenticateToken,purchaseCourse)
+courseRouter.get('/course/deactivateCourseById/:courseId',deactivateCourseById)
 courseRouter.post('/course/addLecture',addLecturesToBatch)
 courseRouter.get('/batchdetails/:id',batchDetailsById)
 

@@ -6,14 +6,8 @@ const { sendTemplatedEmail } = require("../SES/ses");
 const { generateSignedUrl } = require("../S3/s3");
 const jwt = require("jsonwebtoken");
 
-
-
 // Function to generate OTP
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000);
-
-
-
-
 
 // API to validate OTP
 const validateOTP = async (req, res) => {
@@ -21,9 +15,9 @@ const validateOTP = async (req, res) => {
 
   try {
     const db = getDb();
-    const { email, phoneNumber, otp, } = req.body;
-   console.log(req.body);
-   
+    const { email, phoneNumber, otp } = req.body;
+    console.log(req.body);
+
     // Validate input: OTP, role, and either email or phoneNumber are required
     if (!otp || (!email && !phoneNumber)) {
       return res.status(400).json({
@@ -32,7 +26,6 @@ const validateOTP = async (req, res) => {
         error: true,
       });
     }
-
 
     const collection = await db.collection("users");
     const user = await collection.findOne({
@@ -44,8 +37,8 @@ const validateOTP = async (req, res) => {
 
     // If user not found
 
-    console.log("user>>",user);
-    
+    console.log("user>>", user);
+
     if (!user) {
       return res.status(404).json({ message: "User not found.", error: true });
     }
@@ -59,36 +52,36 @@ const validateOTP = async (req, res) => {
 
     // Generate token (for authentication purposes)
 
-
     // Send token and user details in response
     console.log("user>>", user);
-   if(user.isRegistered){
-    const token = jwt.sign(
-      { id: user._id }, // Use the _id from the updated user
-      process.env.JWT_SECRET_KEY,
-    );
+    if (user.isRegistered) {
+      const token = jwt.sign(
+        { id: user._id }, // Use the _id from the updated user
+        process.env.JWT_SECRET_KEY
+      );
 
-    // Prepare the response with only the needed fields
-    const userDetails = {
-      token,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      phone: user.phone,
-      school: user.school,
-      course: user.course,
-      isRegistered:user.isRegistered,
-    };
+      // Prepare the response with only the needed fields
+      const userDetails = {
+        token,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        school: user.school,
+        course: user.course,
+        isRegistered: user.isRegistered,
+      };
 
-    return res.status(200).json({ message: 'User Logged in successfully', user:userDetails });
+      return res
+        .status(200)
+        .json({ message: "User Logged in successfully", user: userDetails });
+    }
 
-   }
-   
     return res.status(200).json({
       message: "Sign-in successful",
       user: {
         id: user._id,
-        isRegistered:user.isRegistered,
+        isRegistered: user.isRegistered,
       },
     });
   } catch (error) {
@@ -143,12 +136,13 @@ const sendOtpWithSms = async (req, res) => {
       await sendSMS(fullPhoneNumber, message);
 
       return res.status(200).json({
-        message: "OTP sent successfully. New user, redirect to registration form.",
+        message:
+          "OTP sent successfully. New user, redirect to registration form.",
         newUser: true,
         otpSent: true,
         isRegistered: false, // User is not registered yet
         phoneNumber,
-        otp
+        otp,
       });
     }
 
@@ -163,11 +157,12 @@ const sendOtpWithSms = async (req, res) => {
       await sendSMS(fullPhoneNumber, message);
 
       return res.status(200).json({
-        message: "OTP sent successfully. User not fully registered, proceed with registration.",
+        message:
+          "OTP sent successfully. User not fully registered, proceed with registration.",
         newUser: false, // User document already exists
         isRegistered: false, // User has not completed registration
         otpSent: true,
-        otp
+        otp,
       });
     }
 
@@ -186,7 +181,7 @@ const sendOtpWithSms = async (req, res) => {
         newUser: false,
         isRegistered: true, // User is fully registered
         otpSent: true,
-        otp
+        otp,
       });
     }
   } catch (error) {
@@ -194,7 +189,6 @@ const sendOtpWithSms = async (req, res) => {
     return res.status(500).json({ message: "Failed to send OTP." });
   }
 };
-
 
 const sendOtpWithEmail = async (req, res) => {
   console.log(req.body);
@@ -224,7 +218,7 @@ const sendOtpWithEmail = async (req, res) => {
       const newUser = {
         email,
         otp,
-        isRegistered: false,  // User has not completed registration yet
+        isRegistered: false, // User has not completed registration yet
         createdAt: new Date(),
       };
 
@@ -235,41 +229,37 @@ const sendOtpWithEmail = async (req, res) => {
       await sendTemplatedEmail([email], "OTPAuthentication", templateData);
 
       return res.status(200).json({
-        message: "OTP sent successfully. New user, redirect to registration form.",
+        message:
+          "OTP sent successfully. New user, redirect to registration form.",
         newUser: true,
         otpSent: true,
-        isRegistered: false,  // User is not registered yet
+        isRegistered: false, // User is not registered yet
         email,
-        otp
+        otp,
       });
     }
 
     // Case 2: User exists but not fully registered
     if (user && !user.isRegistered) {
-      await usersCollection.updateOne(
-        { email },
-        { $set: { otp } }
-      );
+      await usersCollection.updateOne({ email }, { $set: { otp } });
 
       // Send OTP via email
       const templateData = { otp: otp.toString() };
       await sendTemplatedEmail([email], "OTPAuthentication", templateData);
 
       return res.status(200).json({
-        message: "OTP sent successfully. User not fully registered, proceed with registration.",
-        newUser: false,  // User document already exists
-        isRegistered: false,  // User has not completed registration
+        message:
+          "OTP sent successfully. User not fully registered, proceed with registration.",
+        newUser: false, // User document already exists
+        isRegistered: false, // User has not completed registration
         otpSent: true,
-        otp
+        otp,
       });
     }
 
     // Case 3: User is fully registered
     if (user && user.isRegistered) {
-      await usersCollection.updateOne(
-        { email },
-        { $set: { otp } }
-      );
+      await usersCollection.updateOne({ email }, { $set: { otp } });
 
       // Send OTP via email
       const templateData = { otp: otp.toString() };
@@ -278,9 +268,9 @@ const sendOtpWithEmail = async (req, res) => {
       return res.status(200).json({
         message: "User is already registered. OTP sent successfully.",
         newUser: false,
-        isRegistered: true,  // User is fully registered
+        isRegistered: true, // User is fully registered
         otpSent: true,
-        otp
+        otp,
       });
     }
   } catch (error) {
@@ -288,7 +278,6 @@ const sendOtpWithEmail = async (req, res) => {
     return res.status(500).json({ message: "Failed to send OTP." });
   }
 };
-
 
 const uploadImage = async (req, res) => {
   try {
@@ -306,7 +295,6 @@ const uploadImage = async (req, res) => {
     });
   }
 };
-
 
 const insertEmail = async (req, res) => {
   const { email } = req.body;
@@ -333,10 +321,9 @@ const insertEmail = async (req, res) => {
   }
 };
 
-
 const register = async (req, res) => {
   const { id, firstName, lastName, email, phone, school, course } = req.body;
-  
+
   try {
     const db = getDb(); // Get MongoDB instance
 
@@ -345,53 +332,58 @@ const register = async (req, res) => {
       { _id: new ObjectId(id), isRegistered: false }, // Query to find user with specified ID and ensure not registered
       {
         $set: {
-          firstName,          // Only add or update these fields
+          firstName, // Only add or update these fields
           lastName,
           email,
           phone,
           school,
           course,
           isRegistered: true, // Set the `isRegistered` flag to true
-          updatedAt: new Date() // Add the `updatedAt` timestamp
+          updatedAt: new Date(), // Add the `updatedAt` timestamp
         },
         $setOnInsert: {
           createdAt: new Date(), // This ensures `createdAt` is only added if the document is newly inserted (not applicable here but ensures consistency)
-        }
+        },
       },
       {
-        returnDocument: 'after', // Return the updated document
-        upsert: false // Do not create a new document if it doesn't exist (you only want to update)
+        returnDocument: "after", // Return the updated document
+        upsert: false, // Do not create a new document if it doesn't exist (you only want to update)
       }
     );
 
     console.log(userDetails);
-    
-    if (userDetails) { // Check if a document was updated
 
-        const token = jwt.sign(
-          { id: userDetails._id }, // Use the _id from the updated user
-          process.env.JWT_SECRET_KEY,
-        );
-  
-        // Prepare the response with only the needed fields
-        const user = {
-          token,
-          firstName: userDetails.firstName,
-          lastName: userDetails.lastName,
-          email: userDetails.email,
-          phone: userDetails.phone,
-          school: userDetails.school,
-          course: userDetails.course,
-        };
-  
-        return res.status(200).json({ message: 'User registered successfully', user });
+    if (userDetails) {
+      // Check if a document was updated
+
+      const token = jwt.sign(
+        { id: userDetails._id }, // Use the _id from the updated user
+        process.env.JWT_SECRET_KEY
+      );
+
+      // Prepare the response with only the needed fields
+      const user = {
+        token,
+        firstName: userDetails.firstName,
+        lastName: userDetails.lastName,
+        email: userDetails.email,
+        phone: userDetails.phone,
+        school: userDetails.school,
+        course: userDetails.course,
+      };
+
+      return res
+        .status(200)
+        .json({ message: "User registered successfully", user });
       // return res.status(200).json({ message: 'User registered successfully', user });
     } else {
-      return res.status(404).json({ message: 'User not found or already registered' });
+      return res
+        .status(404)
+        .json({ message: "User not found or already registered" });
     }
   } catch (error) {
-    console.error('Error registering user:', error);
-    return res.status(500).json({ message: 'Server error' });
+    console.error("Error registering user:", error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -457,5 +449,5 @@ module.exports = {
   validateOTP,
   register,
   uploadImage,
-  insertEmail
+  insertEmail,
 };

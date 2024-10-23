@@ -4,7 +4,6 @@ const { v4: uuidv4 } = require("uuid");
 const { sendTemplatedEmail } = require("../SES/ses.js");
 const { getDb } = require("../db/db");
 
-
 const razorpay = new Razorpay({
   key_id: "rzp_test_IqmS1BltCU4SFU",
   key_secret: "tJA2Z7X9lDyG8FHfmZ6J2qv6",
@@ -35,9 +34,16 @@ const verifyOrder = async (req, res) => {
   console.log("Inside verify", req.body);
 
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseId, batchId, price } = req.body;
-    console.log("body>>",req.body);
-    
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      courseId,
+      batchId,
+      price,
+    } = req.body;
+    console.log("body>>", req.body);
+
     const hmac = crypto.createHmac("sha256", razorpay.key_secret);
     hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
     const generated_signature = hmac.digest("hex");
@@ -47,9 +53,9 @@ const verifyOrder = async (req, res) => {
 
       // Get user ID from req.user
       const userId = req.user._id; // Assuming req.user contains the authenticated user
-      console.log("userDetails>>",req.user);
-      console.log("id>>",userId);
-      
+      console.log("userDetails>>", req.user);
+      console.log("id>>", userId);
+
       const db = getDb(); // Get the database connection
 
       // Create payment details document
@@ -64,13 +70,12 @@ const verifyOrder = async (req, res) => {
         createdAt: new Date(), // Optional: add a timestamp
       };
 
-      console.log("paymentDetials>>",paymentDetails);
-      
+      console.log("paymentDetials>>", paymentDetails);
 
       // Save payment details to the payments collection
       const result = await db.collection("payments").insertOne(paymentDetails);
       console.log(result);
-      
+
       const paymentId = result.insertedId; // Get the newly created document ID
 
       // Update the user's purchasedCourses array
@@ -79,7 +84,9 @@ const verifyOrder = async (req, res) => {
         { $push: { purchasedCourses: paymentId } } // Add the paymentId to the purchasedCourses array
       );
 
-      return res.status(200).json({ message: "Payment verified successfully.", paymentId });
+      return res
+        .status(200)
+        .json({ message: "Payment verified successfully.", paymentId });
     } else {
       console.log("Inside failure");
       return res.status(400).json({ message: "Payment verification failed." });
@@ -160,12 +167,10 @@ const createPaymentLink = async (req, res) => {
     // Send payment link via email
     await sendTemplatedEmail([email], "SendPaymentLink", templateData);
 
-    res
-      .status(200)
-      .json({
-        message: "Payment link created and email sent successfully",
-        paymentLink,
-      });
+    res.status(200).json({
+      message: "Payment link created and email sent successfully",
+      paymentLink,
+    });
   } catch (error) {
     console.error("Error creating payment link or sending email:", error);
     res
@@ -174,10 +179,7 @@ const createPaymentLink = async (req, res) => {
   }
 };
 
-// Webhook handler
 const handleWebhook = async (req, res) => {
-
-  
   const receivedSignature = req.headers["x-razorpay-signature"];
   const requestBody = JSON.stringify(req.body);
 
@@ -252,10 +254,10 @@ const handleWebhook = async (req, res) => {
       await paymentCollection.insertOne(data);
 
       const updateResult = await appointmentCollection.updateOne(
-        { _id: appointment_id},
+        { _id: appointment_id },
         { $set: { payment_status: 1 } }
       );
-  
+
       if (updateResult.matchedCount === 0) {
         return res.status(404).json({
           message: "Failed to update the slots.",
@@ -350,4 +352,10 @@ const applyCouponCode = async (req, res) => {
   }
 };
 
-module.exports = { createOrder, verifyOrder, createPaymentLink, handleWebhook, applyCouponCode };
+module.exports = {
+  createOrder,
+  verifyOrder,
+  createPaymentLink,
+  handleWebhook,
+  applyCouponCode,
+};
