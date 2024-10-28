@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const { getDb } = require("../db/db");
+const { generateSignedUrl } = require("../S3/s3");
 
 // Create a batch for a course
 exports.createBatch = async (req, res) => {
@@ -99,3 +100,21 @@ exports.getBatchesByCourseId = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch batch details" });
   }
 };
+
+exports.AddFile=async(req,res)=>{
+
+ try {
+    const result = await generateSignedUrl();
+    console.log("res", result);
+    return res.status(200).json({
+      message: "Get URL successfully.",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: error.toString(),
+    });
+  }
+}
