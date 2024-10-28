@@ -322,7 +322,7 @@ const insertEmail = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const { id, firstName, lastName, email, phone, school, course } = req.body;
+  const { id, firstName, lastName, email, phone, school, course,year } = req.body;
 
   try {
     const db = getDb(); // Get MongoDB instance
@@ -338,6 +338,7 @@ const register = async (req, res) => {
           phone,
           school,
           course,
+          year,
           isRegistered: true, // Set the `isRegistered` flag to true
           updatedAt: new Date(), // Add the `updatedAt` timestamp
         },
@@ -370,6 +371,7 @@ const register = async (req, res) => {
         phone: userDetails.phone,
         school: userDetails.school,
         course: userDetails.course,
+        year:userDetails.year
       };
 
       return res
