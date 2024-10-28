@@ -21,6 +21,7 @@ exports.createCourse = async (req, res) => {
       outcome,
       batchType,
       instructors,
+      image
     } = req.body;
 
     // Validation to ensure all required fields are provided
@@ -40,7 +41,7 @@ exports.createCourse = async (req, res) => {
       !courseStructure ||
       !outcome ||
       !batchType ||
-      !instructors
+      !instructors||!image
     ) {
       return res.status(400).json({ error: "All fields are required" });
     }
@@ -68,6 +69,7 @@ exports.createCourse = async (req, res) => {
       isActive : true ,
       createdAt: currentDate, // Set the creation date
       updatedAt: currentDate, // Set the updated date to the same value initially
+      images:image
     };
 
     // Insert course into the 'courses' collection
