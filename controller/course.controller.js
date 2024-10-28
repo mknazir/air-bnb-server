@@ -365,7 +365,8 @@ exports.getLatestCourses = async (req, res) => {
     const latestCourses = await db
       .collection("courses")
       .find({isActive: true})
-      .sort({ created: -1 }) // Sort by created date in descending order
+      .sort({ 
+        createdAt: -1 }) // Sort by created date in descending order
       .limit(5) // Limit to the latest 10 courses
       .toArray();
 
