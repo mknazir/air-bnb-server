@@ -12,23 +12,29 @@ const RAZORPAY_WEBHOOK_SECRET = "your_webhook_secret";
 
 const createOrder = async (req, res) => {
   try {
-    console.log("isnide create order", req.body);
+    console.log("Inside create order", req.body);
+
+    // Convert the amount to paise and round to the nearest integer
+    const amountInPaise = Math.round(req.body.amount * 100);
+
     const options = {
-      amount: req.body.amount * 100, // amount in the smallest currency unit
+      amount: amountInPaise, // amount in the smallest currency unit
       currency: "INR",
       receipt: uuidv4(),
     };
 
     const order = await razorpay.orders.create(options);
-    console.log("iside order crate", order);
+    console.log("Order created successfully:", order);
     return res.status(200).json(order);
   } catch (error) {
-    res.status(500).json({
+    console.error("Error creating order:", error);
+    return res.status(500).json({
       message: "Internal Server Error",
       error: true,
     });
   }
 };
+
 
 const verifyOrder = async (req, res) => {
   console.log("Inside verify", req.body);
