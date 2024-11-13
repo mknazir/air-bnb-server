@@ -1,11 +1,12 @@
 const express = require('express');
-const {createCourse,getAllCourses,getLatestCourses,getCoursesByCategory,getLatestCoursesByCategory,getCoursesBySubcategory,getLatestCoursesBySubcategory,getCourseById,purchaseCourse,ad, addLecturesToBatch, batchDetailsById, deactivateCourseById, getLectureDetails, editLectureInBatch, deleteLectureFromBatch, getAllInstructors, editInstructorDetails, deleteInstructor, addInstructorDetails}=require('../controller/course.controller')
+const {createCourse,getAllCourses,getLatestCourses,getCoursesByCategory,getLatestCoursesByCategory,getCoursesBySubcategory,getLatestCoursesBySubcategory,getCourseById,purchaseCourse,ad, addLecturesToBatch, batchDetailsById, deactivateCourseById, getLectureDetails, editLectureInBatch, deleteLectureFromBatch, getAllInstructors, editInstructorDetails, deleteInstructor, addInstructorDetails, editCourse}=require('../controller/course.controller')
 const authenticateToken = require('../middleware/authToken.middleware');
 
 const courseRouter = express.Router();
 
 
 courseRouter.post('/course/createCourse', createCourse);
+courseRouter.post('/course/editCourse/:courseId', editCourse);
 courseRouter.get('/course/getAllCourse', getAllCourses);
 courseRouter.get('/course/getLatestCourses', getLatestCourses);
 courseRouter.get('/course/getCoursesByCategory/:category', getCoursesByCategory);

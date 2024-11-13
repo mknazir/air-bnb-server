@@ -87,6 +87,98 @@ exports.createCourse = async (req, res) => {
   }
 };
 
+exports.editCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const db = getDb();
+    const {
+      title,
+      subtitle,
+      duration,
+      module,
+      price,
+      level,
+      category,
+      subcategory,
+      mode,
+      learning,
+      skills,
+      pedagogy,
+      courseStructure,
+      outcome,
+      batchType,
+      instructors,
+      image
+    } = req.body;
+
+    // Validation to ensure all required fields are provided
+    if (
+      !title ||
+      !subtitle ||
+      !duration ||
+      !module ||
+      !price ||
+      !level ||
+      !category ||
+      !subcategory ||
+      !mode ||
+      !learning ||
+      !skills ||
+      !pedagogy ||
+      !courseStructure ||
+      !outcome ||
+      !batchType ||
+      !instructors||!image
+    ) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const currentDate = new Date(); // Get the current date
+
+    const course = {
+      title,
+      subtitle,
+      duration,
+      module,
+      price,
+      level, // e.g., Beginner, Intermediate, Advanced
+      category, // e.g., Internship, Training, Tutorials
+      subcategory, // e.g., Postgraduate, Graduate, Early Career, Professional
+      mode,
+      learning, // Array of learning points (5-6 strings)
+      skills, // Array of skill strings (2-3 words)
+      pedagogy, // Array of objects with URL and text
+      courseStructure, // Array of objects {heading, subheading: [text]}
+      outcome, // Array of outcome texts
+      batchType, // e.g., Weekend, Daily
+      batches: [], // Empty array for now
+      instructors, // Array of instructor objects {img_url, degree, name, specialization, experience}
+      isActive : true ,
+      createdAt: currentDate, // Set the creation date
+      updatedAt: currentDate, // Set the updated date to the same value initially
+      images:image
+    };
+
+    const courseCollection = db.collection("courses");
+
+    const updateResult = await courseCollection.updateOne(
+      { _id: new ObjectId(courseId) },
+      { $set: course }
+    );
+
+    if (updateResult.modifiedCount === 1) {
+      console.log("Course updated successfully.");
+      res.status(200).json({ message: "Course updated successfully" });
+    } else {
+      console.log("Course not found or no changes made.");
+      res.status(404).json({ error: "Course not found or no changes made" });
+    }
+  } catch (error) {
+    console.error("Error updating instructor:", error);
+    res.status(500).json({ error: "Failed to update instructor" });
+  }
+};
+
 exports.getCoursesByCategory = async (req, res) => {
   console.log("called");
 
