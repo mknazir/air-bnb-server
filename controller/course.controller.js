@@ -424,12 +424,17 @@ exports.addLecturesToBatch = async (req, res) => {
       });
     }
 
+    const lectureWithId = {
+      ...lecture,
+      lectureId: new ObjectId(), // Add unique lectureId to the lecture object
+    }
+
     // Add the lecture object to the existing lectures array
     const result = await batchCollection.updateOne(
       { _id: new ObjectId(batch_id) },
       {
         $push: {
-          lectures: lecture, // Append the lecture object into the existing lectures array
+          lectures: lectureWithId, // Append the lecture object into the existing lectures array
         },
       }
     );
@@ -518,5 +523,264 @@ exports.deactivateCourseById = async (req, res) => {
   } catch (error) {
     console.error("Error deactivating course:", error);
     res.status(500).json({ error: "Failed to deactivate course" });
+  }
+};
+
+exports.getLectureDetails = async (req, res) => {
+  try {
+    const { batchId, lectureId } = req.params;
+
+    // Validate input: batchId and lectureId must be provided
+    if (!batchId || !lectureId) {
+      return res.status(400).json({
+        success: false,
+        message: "batchId and lectureId are required",
+      });
+    }
+
+    const db = getDb();
+    const batchCollection = db.collection("batches");
+
+    // Find the batch using the batchId
+    const batch = await batchCollection.findOne({
+      _id: new ObjectId(batchId),
+    });
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    // Find the lecture with the given lectureId within the lectures array
+    const lecture = batch.lectures.find(
+      (lecture) => lecture.lectureId.toString() === lectureId
+    );
+
+    if (!lecture) {
+      return res.status(404).json({
+        success: false,
+        message: "Lecture not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      lecture, // Return the lecture details
+    });
+  } catch (error) {
+    console.error("Error retrieving lecture details:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+exports.editLectureInBatch = async (req, res) => {
+  try {
+    const { batch_id, lecture_id, lecture } = req.body;
+
+    // Validate input: batch_id, lecture_id, and lecture must be provided
+    if (!batch_id || !lecture_id || !lecture || typeof lecture !== "object") {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: batch_id, lecture_id, or lecture object is invalid",
+      });
+    }
+
+    const db = getDb();
+    const batchCollection = db.collection("batches");
+
+    // Check if the batch exists
+    const batch = await batchCollection.findOne({ _id: new ObjectId(batch_id) });
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    // Update the specific lecture in the lectures array
+    const result = await batchCollection.updateOne(
+      { _id: new ObjectId(batch_id), "lectures.lectureId": new ObjectId(lecture_id) },
+      {
+        $set: {
+          "lectures.$": {
+            ...lecture,
+            lectureId: new ObjectId(lecture_id), // Ensure lectureId remains the same
+          },
+        },
+      }
+    );
+
+    // Check if the operation was successful
+    if (result.modifiedCount > 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Lecture successfully updated in the batch",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update the lecture in the batch",
+      });
+    }
+  } catch (error) {
+    console.error("Error during lecture update:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+exports.deleteLectureFromBatch = async (req, res) => {
+  try {
+    const { batch_id, lecture_id } = req.params;
+
+    // Validate input
+    if (!batch_id || !lecture_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: batch_id or lecture_id",
+      });
+    }
+
+    const db = getDb();
+    const batchCollection = db.collection("batches");
+
+    // Check if the batch exists
+    const batch = await batchCollection.findOne({ _id: new ObjectId(batch_id) });
+
+    if (!batch) {
+      return res.status(404).json({
+        success: false,
+        message: "Batch not found",
+      });
+    }
+
+    // Delete the specific lecture in the lectures array
+    const result = await batchCollection.updateOne(
+      { _id: new ObjectId(batch_id) },
+      { $pull: { lectures: { lectureId: new ObjectId(lecture_id) } } }
+    );
+
+    // Check if the operation was successful
+    if (result.modifiedCount > 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Lecture successfully deleted from the batch",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete the lecture from the batch",
+      });
+    }
+  } catch (error) {
+    console.error("Error during lecture deletion:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+// Get all instructors
+exports.getAllInstructors = async (req, res) => {
+  try {
+
+    const db = getDb();
+    const instructorCollection = db.collection("instructors");
+
+    const instructors = await instructorCollection.find().toArray();
+    res.status(200).json(instructors);
+  } catch (error) {
+    console.error("Error fetching instructors:", error);
+    res.status(500).json({ error: "Failed to fetch instructors" });
+  }
+};
+
+// Add instructor details
+exports.addInstructorDetails = async (req, res) => {
+  try {
+    const { name, img_url, degree, specialization, experience } = req.body;
+    const db = getDb();
+    const instructorCollection = db.collection("instructors");
+
+    if (
+      !name || !degree || !specialization || !experience 
+    ) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+    
+    const instructor = {
+      name, 
+      img_url, 
+      degree, 
+      specialization, 
+      experience
+    }
+
+    const result = await instructorCollection.insertOne(instructor);
+
+    res.status(201).json({
+      message: "instructor created successfully",
+      instructorId: result.insertedId,
+      instructor: instructor,
+    });
+
+  } catch (error) {
+    console.error("Error updating instructor:", error);
+    res.status(500).json({ error: "Failed to update instructor" });
+  }
+};
+
+// Edit instructor details
+exports.editInstructorDetails = async (req, res) => {
+  try {
+    const { instructorId } = req.params;
+    const { name, img_url, degree, specialization, experience } = req.body;
+    const db = getDb();
+    const instructorCollection = db.collection("instructors");
+
+    const updateResult = await instructorCollection.updateOne(
+      { _id: new ObjectId(instructorId) },
+      { $set: { name, img_url, degree, specialization, experience } }
+    );
+
+    if (updateResult.modifiedCount === 1) {
+      console.log("Instructors updated successfully.");
+      res.status(200).json({ message: "Instructors updated successfully" });
+    } else {
+      console.log("Instructors not found or no changes made.");
+      res.status(404).json({ error: "Instructors not found or no changes made" });
+    }
+  } catch (error) {
+    console.error("Error updating instructor:", error);
+    res.status(500).json({ error: "Failed to update instructor" });
+  }
+};
+
+// Delete an instructor
+exports.deleteInstructor = async (req, res) => {
+  try {
+    const { instructorId } = req.params;
+    const db = getDb();
+    const instructorCollection = db.collection("instructors");
+
+    const deleteResult = await instructorCollection.deleteOne({ _id: new ObjectId(instructorId) });
+
+    if (deleteResult.deletedCount === 1) {
+      res.status(200).json({ message: "Instructor deleted successfully" });
+    }else{
+      return res.status(404).json({ message: "Instructor not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting instructor:", error);
+    res.status(500).json({ error: "Failed to delete instructor" });
   }
 };
