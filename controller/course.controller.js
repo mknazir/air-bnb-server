@@ -405,13 +405,14 @@ exports.getCourseById = async (req, res) => {
     }
 
     // Step 4: Extract instructor names and find their details from the 'instructors' collection
-    const instructorNames = course.instructors || [];
+    const instructorIds = course.instructors?.map((instructor) => new ObjectId(instructor._id)) || [];
+
     let instructors = [];
-    if (instructorNames.length > 0) {
+    if (instructorIds.length > 0) {
       instructors = await db
         .collection("instructors")
         .find({
-          name: { $in: instructorNames },
+          _id: { $in: instructorIds },
         })
         .toArray();
     }
