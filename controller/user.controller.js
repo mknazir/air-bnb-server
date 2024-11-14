@@ -2,6 +2,7 @@ const { ObjectId } = require("mongodb");
 const { getDb } = require("../db/db");
 const moment = require("moment");
 const { sendTemplatedEmail } = require("../SES/ses.js");
+const { generateSignedUrl } = require("../S3/s3.js");
 
 const userDetails = async (req, res) => {
   try {
@@ -111,8 +112,24 @@ const contactSupport = async (req, res) => {
     });
   }
 };
+const getUrl = async (req, res) => {
+  try {
+    const result = await generateSignedUrl();
+    return res.status(200).json({
+      message: "Get URL successfully.",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: error.toString(),
+    });
+  }
+};
 module.exports = {
   userDetails,
   getUserDetails,
   contactSupport,
+  getUrl
 };

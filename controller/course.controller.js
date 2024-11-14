@@ -21,7 +21,8 @@ exports.createCourse = async (req, res) => {
       outcome,
       batchType,
       instructors,
-      image
+      image,
+      courseImage
     } = req.body;
 
     // Validation to ensure all required fields are provided
@@ -69,7 +70,8 @@ exports.createCourse = async (req, res) => {
       isActive : true ,
       createdAt: currentDate, // Set the creation date
       updatedAt: currentDate, // Set the updated date to the same value initially
-      images:image
+      images:image,
+      courseImage:courseImage
     };
 
     // Insert course into the 'courses' collection
@@ -108,7 +110,8 @@ exports.editCourse = async (req, res) => {
       outcome,
       batchType,
       instructors,
-      image
+      image,
+      courseImage
     } = req.body;
 
     // Validation to ensure all required fields are provided
@@ -156,7 +159,8 @@ exports.editCourse = async (req, res) => {
       isActive : true ,
       createdAt: currentDate, // Set the creation date
       updatedAt: currentDate, // Set the updated date to the same value initially
-      images:image
+      images:image,
+      courseImage:courseImage
     };
 
     const courseCollection = db.collection("courses");
@@ -801,19 +805,20 @@ exports.getAllInstructors = async (req, res) => {
 // Add instructor details
 exports.addInstructorDetails = async (req, res) => {
   try {
-    const { name, img_url, degree, specialization, experience } = req.body;
+    const { name,  imageUrl, degree, specialization, experience } = req.body;
     const db = getDb();
     const instructorCollection = db.collection("instructors");
 
     if (
       !name || !degree || !specialization || !experience 
+      ||! imageUrl
     ) {
       return res.status(400).json({ error: "All fields are required" });
     }
     
     const instructor = {
       name, 
-      img_url, 
+      imageUrl, 
       degree, 
       specialization, 
       experience
@@ -837,13 +842,13 @@ exports.addInstructorDetails = async (req, res) => {
 exports.editInstructorDetails = async (req, res) => {
   try {
     const { instructorId } = req.params;
-    const { name, img_url, degree, specialization, experience } = req.body;
+    const { name, imageUrl, degree, specialization, experience } = req.body;
     const db = getDb();
     const instructorCollection = db.collection("instructors");
 
     const updateResult = await instructorCollection.updateOne(
       { _id: new ObjectId(instructorId) },
-      { $set: { name, img_url, degree, specialization, experience } }
+      { $set: { name, imageUrl, degree, specialization, experience } }
     );
 
     if (updateResult.modifiedCount === 1) {

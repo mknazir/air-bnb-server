@@ -1,6 +1,6 @@
 const express = require('express');
 const authenticateToken = require('../middleware/authToken.middleware');
-const { userDetails, getUserDetails, contactSupport} = require('../controller/user.controller');
+const { userDetails, getUserDetails, contactSupport, getUrl} = require('../controller/user.controller');
 // Import the controllers
 
 
@@ -11,6 +11,7 @@ const userRouter = express.Router();
 
 userRouter.get('/user/userDetails', authenticateToken, userDetails);
 userRouter.get('/getUserDetails/:id', getUserDetails);
+userRouter.get('/getUrl', getUrl);
 userRouter.post('/contactSupport',contactSupport)
 
 // Export the router
