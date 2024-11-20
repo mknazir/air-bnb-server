@@ -789,6 +789,7 @@ exports.deleteLectureFromBatch = async (req, res) => {
 
 // Get all instructors
 exports.getAllInstructors = async (req, res) => {
+  console.log("dfdfd")
   try {
 
     const db = getDb();
@@ -883,3 +884,50 @@ exports.deleteInstructor = async (req, res) => {
     res.status(500).json({ error: "Failed to delete instructor" });
   }
 };
+// uoload certifcate
+exports.uploadCertificate =async (req, res) => {
+  const { batchId, imageUrl, title } = req.body;
+  try {
+    if (!batchId || !imageUrl || !title) {
+      return res
+        .status(400)
+        .json({ message: "batchId, imageUrl, and title are required." });
+    }
+
+    const db = getDb();
+    const Batch = db.collection("batches");
+    console.log(batchId,"batch id");
+    
+
+    // Check for duplicate directly in the DB
+    const duplicate = await Batch.findOne({
+      _id: new ObjectId(batchId),
+      certificate: { $elemMatch: { imageUrl, title } },
+    });
+
+    if (duplicate) {
+      return res.status(409).json({ message: "Certificate already exists." });
+    }
+
+    // Add the new certificate
+    const newCertificate = {
+      certificateId: new ObjectId(),
+      imageUrl,
+      title,
+    };
+
+    await Batch.updateOne(
+      { _id: new ObjectId(batchId) },
+      { $push: { certificate: newCertificate } }
+    );
+
+    res.status(200).json({
+      message: "Certificate added successfully.",
+      certificate: newCertificate,
+    });
+  } catch (error) {
+    console.error("Error adding certificate:", error);
+    res.status(500).json({ message: "Internal Server Error", error });
+  }
+};
+

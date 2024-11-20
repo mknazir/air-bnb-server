@@ -68,7 +68,6 @@ const s3Client = new S3Client({
 const generateSignedUrl = async (contentType) => {
    const bytes = await randomBytes(16);
    const imageName = bytes.toString('hex');
-   console.log("Generated image name:", imageName);
 
    const command = new PutObjectCommand({
         Bucket: bucketName,  // Use env variable here
@@ -78,8 +77,6 @@ const generateSignedUrl = async (contentType) => {
 
    // Generate signed URL, optionally set expiration (in seconds), e.g., 300 = 5 minutes
    const url = await getSignedUrl(s3Client, command, { expiresIn: 300 });
-   
-   console.log("Signed URL:", url);
    return {
     url,
     imageName
