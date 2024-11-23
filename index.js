@@ -13,6 +13,7 @@ const userRouter = require('./route/user.route.js');
 const paymentRouter = require('./route/payment.route.js');
 const courseRouter = require("./route/course.route.js");
 const batchRouter = require("./route/batch.route.js");
+const geuRouter=require('./route/geu.route.js')
 
 env.config();
 const app=express()
@@ -51,6 +52,7 @@ app.use('/api',userRouter)
 app.use('/api',paymentRouter)
 app.use('/api',courseRouter)
 app.use('/api',batchRouter)
+app.use('/api',geuRouter)
 
 
 
