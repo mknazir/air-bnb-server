@@ -7,6 +7,7 @@ const { connectToDatabase, getDb } = require("./db/db.js");
 const express=require('express')
 
 
+
 //router
 const authRouter = require('./route/auth.route.js');
 const userRouter = require('./route/user.route.js');
@@ -14,6 +15,7 @@ const paymentRouter = require('./route/payment.route.js');
 const courseRouter = require("./route/course.route.js");
 const batchRouter = require("./route/batch.route.js");
 const geuRouter=require('./route/geu.route.js')
+const jindalRouter=require('./route/jindal.route.js');
 
 env.config();
 const app=express()
@@ -53,6 +55,7 @@ app.use('/api',paymentRouter)
 app.use('/api',courseRouter)
 app.use('/api',batchRouter)
 app.use('/api',geuRouter)
+app.use('/api',jindalRouter);
 
 
 
