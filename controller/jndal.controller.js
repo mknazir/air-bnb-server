@@ -248,3 +248,16 @@ exports.verifyOrder = async (req, res) => {
   }
 };
 
+exports.getAllJindalCourses = async (req, res) => {
+  try {
+    const db = getDb();
+
+    // Fetch the latest 10 courses sorted by the 'created' field in descending order
+    const latestCourses = await db.collection("jindalcourse").find({isActive: true}).toArray();
+
+    // Send the response
+    res.status(200).json(latestCourses);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch latest courses" });
+  }
+};
