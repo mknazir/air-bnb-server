@@ -9,6 +9,7 @@ exports.jindalCreateCourse = async (req, res) => {
         subtitle,
         duration,
         price,
+        period,
         category,
         subcategory,
         mode,
@@ -29,7 +30,7 @@ exports.jindalCreateCourse = async (req, res) => {
         !title ||
         !subtitle ||
         !duration ||
-        !price ||
+        !price ||!period||
         !category ||
         !subcategory ||
         !mode ||
@@ -62,6 +63,7 @@ exports.jindalCreateCourse = async (req, res) => {
         title,
         subtitle,
         duration,
+        period,
         price,
         category, // e.g., Training, Workshops, etc.
         subcategory, // e.g., Postgraduate, Undergraduate
