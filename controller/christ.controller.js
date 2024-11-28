@@ -4,7 +4,7 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const { v4: uuidv4 } = require("uuid");
 
-exports.jindalCreateCourse = async (req, res) => {
+exports.christCreateCourse = async (req, res) => {
     try {
       const db = getDb();
       const {
@@ -85,7 +85,7 @@ exports.jindalCreateCourse = async (req, res) => {
       };
   
       // Insert course into the 'courses' collection
-      const result = await db.collection("jindalcourse").insertOne(course);
+      const result = await db.collection("christcourse").insertOne(course);
   
       // Send a detailed success response
       res.status(201).json({
@@ -99,9 +99,7 @@ exports.jindalCreateCourse = async (req, res) => {
       res.status(500).json({ error: "Failed to create course" });
     }
   };
-
-
-exports.getjindalCourseDetails = async (req, res) => {
+exports.getchristCourseDetails = async (req, res) => {
   try {
     const db = getDb();
     const { courseId } = req.params; 
@@ -113,7 +111,7 @@ exports.getjindalCourseDetails = async (req, res) => {
 
     // Fetch the course details from the 'jindalcourse' collection
     const course = await db
-      .collection("jindalcourse")
+      .collection("christcourse")
       .findOne({ _id: new ObjectId(courseId) });
 
     // If no course is found
@@ -162,7 +160,7 @@ exports.verifyOrder = async (req, res) => {
   console.log("Inside verify", req.body);
 
   const db = getDb(); // Replace with your MongoDB database connection logic
-  const collection = db.collection("jindalregistration"); // Adjust the collection name if needed
+  const collection = db.collection("christregistration"); // Adjust the collection name if needed
 
   try {
     const {
@@ -247,12 +245,12 @@ exports.verifyOrder = async (req, res) => {
   }
 };
 
-exports.getAllJindalCourses = async (req, res) => {
+exports.getAllchristCourses = async (req, res) => {
   try {
     const db = getDb();
 
     // Fetch the latest 10 courses sorted by the 'created' field in descending order
-    const latestCourses = await db.collection("jindalcourse").find({isActive: true}).toArray();
+    const latestCourses = await db.collection("christcourse").find({isActive: true}).toArray();
 
     // Send the response
     res.status(200).json(latestCourses);

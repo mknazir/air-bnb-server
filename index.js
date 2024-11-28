@@ -16,6 +16,7 @@ const courseRouter = require("./route/course.route.js");
 const batchRouter = require("./route/batch.route.js");
 const geuRouter=require('./route/geu.route.js')
 const jindalRouter=require('./route/jindal.route.js');
+const christRouter=require('./route/christ.route.js');
 
 env.config();
 const app=express()
@@ -56,6 +57,7 @@ app.use('/api',courseRouter)
 app.use('/api',batchRouter)
 app.use('/api',geuRouter)
 app.use('/api',jindalRouter);
+app.use('/api',christRouter);
 
 
 
